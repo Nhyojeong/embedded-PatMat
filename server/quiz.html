@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script>
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+
+        async function loadQuiz() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const count = parseInt(urlParams.get('count'), 10); // URL 파라미터에서 문제 수 가져오기
+
+            if (!count || count <= 0) {
+                alert("유효한 문제 수를 입력하십시오.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/get-questions?count=${count}`);
+                if (!response.ok) {
+                    throw new Error("문제를 가져오는 데 실패했습니다.");
+                }
+
+                questions = await response.json();
+                if (questions.length === 0) {
+                    alert("출제 가능한 문제가 없습니다.");
+                    return;
+                }
+
+                displayQuestion();
+            } catch (error) {
+                console.error("Error loading quiz:", error);
+                alert("퀴즈 로드를 실패했습니다.");
+            }
+        }
+
+        function displayQuestion() {
+            const questionContainer = document.getElementById("question-container");
+            const resultContainer = document.getElementById("result-container");
+
+            resultContainer.innerHTML = "";
+            questionContainer.innerHTML = "";
+
+            const question = questions[currentQuestionIndex];
+
+            const questionText = document.createElement("p");
+            questionText.innerHTML = `${currentQuestionIndex + 1}. ${question.text}`;
+            questionContainer.appendChild(questionText);
+
+            const optionsContainer = document.createElement("div");
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement("div");
+                optionElement.style.marginBottom = "10px";
+
+                const radioInput = document.createElement("input");
+                radioInput.type = "radio";
+                radioInput.name = "answer";
+                radioInput.value = index + 1;
+                radioInput.id = `option${index + 1}`;
+
+                const label = document.createElement("label");
+                label.htmlFor = `option${index + 1}`;
+                label.innerText = option;
+
+                optionElement.appendChild(radioInput);
+                optionElement.appendChild(label);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            const submitButton = document.createElement("button");
+            submitButton.textContent = "제출";
+            submitButton.onclick = submitAnswer;
+
+            questionContainer.appendChild(optionsContainer);
+            questionContainer.appendChild(submitButton);
+        }
+
+        function submitAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+
+            const resultContainer = document.getElementById("result-container");
+            resultContainer.innerHTML = "";
+
+            if (!selectedOption) {
+                alert("정답을 선택하세요.");
+                return;
+            }
+
+            const userAnswer = parseInt(selectedOption.value, 10);
+            const currentQuestion = questions[currentQuestionIndex];
+
+            if (userAnswer === currentQuestion.correctAnswer) {
+                correctCount++;
+                const correctMessage = document.createElement("p");
+                correctMessage.textContent = "정답입니다!";
+                resultContainer.appendChild(correctMessage);
+            } else {
+                incorrectCount++;
+                const incorrectMessage = document.createElement("p");
+                incorrectMessage.textContent = "틀렸습니다.";
+                resultContainer.appendChild(incorrectMessage);
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                setTimeout(displayQuestion, 2000);
+            } else {
+                setTimeout(displayResults, 2000);
+            }
+        }
+
+        function displayResults() {
+            const questionContainer = document.getElementById("question-container");
+            questionContainer.innerHTML = "";
+
+            const resultMessage = document.createElement("p");
+            resultMessage.textContent = `퀴즈 완료! 정답: ${correctCount}, 오답: ${incorrectCount}`;
+
+            questionContainer.appendChild(resultMessage);
+        }
+
+        window.onload = loadQuiz;
+    </script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        #question-container, #result-container {
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Time</h1>
+    <div id="question-container"></div>
+    <div id="result-container"></div>
+</body>
+</html>

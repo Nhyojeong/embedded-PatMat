@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Setup</title>
+    <script>
+        function startQuiz() {
+            const questionCount = parseInt(document.getElementById("question-count").value, 10);
+
+            if (!questionCount || questionCount <= 0) {
+                alert("유효한 문제 수를 입력하세요.");
+                return;
+            }
+
+            // quiz.html로 문제 수를 URL 파라미터로 전달
+            window.location.href = `quiz.html?count=${questionCount}`;
+        }
+
+        async function fetchQuestions(count) {
+            const response = await fetch("http://localhost:3000/generate-questions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ count: parseInt(count, 10) })
+            });
+            return response.json();
+        }
+        
+    </script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 1em;
+        }
+        input, textarea {
+            margin-bottom: 1em;
+            padding: 0.5em;
+            width: 700px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        textarea {
+            height: 200px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        input{
+            font-size :1em;
+        }
+        button {
+            padding: 0.5em 1em;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #dbb7b7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #c49e9e;
+        }
+        #logo {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+        }
+        #logo a {
+            text-decoration: none;
+            color: rgb(0, 0, 0);
+            font-size: 1.5em;
+            font-family: 'Grandstander', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Study helper</h1>
+    <p>풀고 싶은 문제 수를 입력하시오.</p>
+    <input id="question-count" type="number" placeholder="Enter number...">
+    <button onclick="startQuiz()">문제 풀기</button>
+
+    <script>
+        function quiz_number(){
+            window.location.href='quiz.html';
+        }
+    </script>
+
+    <div id="question-container"></div>
+</body>
+</html>
