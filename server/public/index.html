@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Maker</title>
+    <!-- title, time 글씨체 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Grandstander:ital,wght@1,900&display=swap" rel="stylesheet">
+    <!-- button 글씨체 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Grandstander:ital,wght@1,900&family=Poor+Story&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Grandstander', sans-serif; /*글꼴*/
+        }
+        body {
+            background-size: cover;
+            display: flex;
+            flex-direction: column; /* 세로 방향으로 배치 */
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 10vh; /* 위쪽으로 10vh만큼 이동 */
+        }
+        h1 {
+            margin-bottom: 1em; /* 제목과 버튼 사이 간격 */
+            font-family: 'Script', sans-serif;
+            font-weight: bold;
+            font-family: 'Grandstander', sans-serif;
+            font-size: 4em;
+        }
+        .button-container {
+            display: flex;
+            gap: 1em; /* 버튼 간 간격 */
+        }
+        a {
+            text-decoration: none; /* 링크의 기본 밑줄 제거 */
+        }
+        button {
+            background-color: #ffd7d7;
+            font-family: 'Poor Story', sans-serif; /*글꼴*/
+            font-size: 1.7em;
+            padding: 1em 2em;
+            border: black;
+            border-radius: 30px;
+            box-shadow: 1px 1px 2px #b96565;
+            cursor: pointer;
+            width: 300px; /* 버튼 너비 */
+            height: 100px; /* 버튼 높이 */
+            text-align: center;
+            white-space: nowrap; /* 텍스트 줄바꿈 방지하기 */
+            margin-bottom: 3vh; /*버튼 하단 공간*/
+        }
+        button:hover {
+            background-color: #ffd2d2; /* 호버 시 버튼 색 변경 */
+        }
+        #image {
+            width: 800px; /* 이미지 너비 조정 */
+            height: auto; /* 이미지 높이 자동 조정 */
+            margin-bottom: 1.5em; /* 이미지와 버튼 사이 간격 */
+        }
+        #time {
+            margin-bottom: 0.5em;
+            font-size: 2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="logo">
+        <h1>Study Helper</h1>
+    </div>
+
+    <div id="time"></div> <!-- 시간 표시 영역 -->
+
+    <script>
+        const ws = new WebSocket('ws://localhost:8080');
+
+        ws.onmessage = (event) => {
+            const message = event.data;
+            if (message === 'REDIRECT_TO_QUIZ_INDEX') {
+                window.location.href = 'quiz_index.html';
+            }
+        };
+
+        ws.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket disconnected');
+        };
+        // 현재 시간 가져와서 업데이트
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('time').textContent = timeString;
+        }
+
+        // 1초마다 시간 업데이트
+        setInterval(updateTime, 1000);
+
+        updateTime();
+    </script>
+    <h1>Welcome to Study Helper</h1>
+    <a href="quiz_index">Go to Quiz</a>
+</body>
+</html>
